@@ -1,6 +1,12 @@
 (ns nanook.core)
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn do-credit
+  "This operation inserts a given amount of money into an account
+   with a description"
+  [acc-number amount description date])
+
+(defn do-credit
+  "This operation inserts a given amount of money into an account
+   with a description"
+  [acc-number amount description date])
+
