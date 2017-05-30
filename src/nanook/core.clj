@@ -1,21 +1,20 @@
-(ns nanook.core)
+(ns nanook.core
+  "This namespace contains the core businesses of Nanook
+   which basically consists of a *facts* atom list that
+   will store the checking accounts facts"
+  (:use [nanook.utils]))
 
-(defn do-credit
-  "This operation inserts a given amount of money into an account
-   with a description"
-  [acc-number amount description date]
-  (println " Acc #: "  acc-number
-           " Amount: " amount
-           " Descr.: " description
-           " Date: "   date))
+(def facts (atom ()))
 
-(defn do-debit
-  "This operation takes away a given amount of money of an account
-   with a description"
-  [acc-number amount description date]
-  (println " Acc #: "  acc-number
-           " Amount: " (- amount)
-           " Descr.: " description
-           " Date: "   date))
+(defn save-fact!
+  "Atomically save a new fact to the facts list"
+  [raw-fact]
+  (let [final-fact (assoc raw-fact :timestamp (get-current-timestamp)
+                                   :uuid (generate-uuid))]
+    (swap! facts conj final-fact)
+    final-fact))
 
-
+(defn retrieve-fact
+  "TODO: Atomically retrieve a fact from the facts list"
+  [searched-fact]
+  (searched-fact (deref facts)))
