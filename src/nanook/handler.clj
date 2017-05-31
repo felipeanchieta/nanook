@@ -5,64 +5,54 @@
         [nanook.facade])
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
+            [clova.core :as clova]
             [ring.middleware.json :as middleware]
             [ring.util.response :refer [resource-response response status]]
             [ring.adapter.jetty :refer (run-jetty)])
   (:gen-class))
 
+(def credit-validation
+  (clova/validation-set [:amount clova/required? clova/numeric? clova/positive?
+                         :description clova/required? clova/stringy? [clova/longer? 5] [clova/shorter? 255]]))
+
+(def debit-validation credit-validation)
+
 (defroutes nanook-routes
   (POST "/accounts/:acc-number{[0-9]{5}}/credit" request
-    (response
-      (if (contains? (:body request) :timestamp)
-        (credit-op (:acc-number (:params request))
-                   (:amount (:body request))
-                   (:description (:body request))
-                   (:timestamp (:body request)))
+    (let [validated (clova/validate credit-validation (:body request))]
+      (if (:valid? validated)
+        (response
+         (if (contains? (:body request) :timestamp)
+           (credit-op (:acc-number (:params request))
+                      (:amount (:body request))
+                      (:description (:body request))
+                      (:timestamp (:body request)))
 
-        (credit-op (:acc-number (:params request))
-                   (:amount (:body request))
-                   (:description (:body request))))))
+           (credit-op (:acc-number (:params request))
+                      (:amount (:body request))
+                      (:description (:body request)))))
+        {:body "400 Bad Request" :status 400})))
 
   (POST "/accounts/:acc-number{[0-9]{5}}/debit" request
-    (response
-      (if (contains? (:body request) :timestamp)
-        (debit-op (:acc-number (:params request))
-                  (:amount (:body request))
-                  (:description (:body request))
-                  (:timestamp (:body request)))
+    (let [validated (clova/validate credit-validation (:body request))]
+      (if (:valid? validated)
+        (response
+         (if (contains? (:body request) :timestamp)
+           (debit-op (:acc-number (:params request))
+                     (:amount (:body request))
+                     (:description (:body request))
+                     (:timestamp (:body request)))
 
-        (debit-op (:acc-number (:params request))
-                  (:amount (:body request))
-                  (:description (:body request))))))
-
-  ;;; TODO: move to future branch
-  (GET "/accounts/:acc-number{[0-9]{5}}/balance" request
-    (response
-      nil))
-
-  (GET "/accounts/:acc-number{[0-9]{5}}/statement" request
-    (response
-      nil))
-
-  (GET "/accounts/:acc-number{[0-9]{5}}/debit-periods" request
-    (response
-      nil))
+           (debit-op (:acc-number (:params request))
+                     (:amount (:body request))
+                     (:description (:body request)))))
+        {:body "400 Bad Request" :status 400})))
 
   (route/not-found "Not Found"))
 
-(defn wrap-invalid-requests [handler]
-  (fn [request]
-    (if (coll? (:body request))
-      (let [body (:body request)]
-        (if (and (not (contains? body :amount))
-                 (not (contains? body :description)))
-          {:status 400
-           :body body})))))
-
 (def app
   (-> (handler/api nanook-routes)
-      ;;(wrap-invalid-requests)
-      (middleware/wrap-json-body {:keywords? true}) 
+      (middleware/wrap-json-body {:keywords? true})
       (middleware/wrap-json-response)))
 
 (defn -main [& args]

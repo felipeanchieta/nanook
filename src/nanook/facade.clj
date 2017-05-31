@@ -23,15 +23,3 @@
   "Gets money into an given account with an amount and a description"
   ([acc-number amount description] (operate :debit acc-number amount description (get-current-timestamp)))
   ([acc-number amount description timestamp] (operate :debit acc-number amount description timestamp)))
-
-;;; TODO: move to future branch
-(defn get-balance
-  "Computes the current balance of a given account"
-  [acc-number]
-  0.0)
-
-(defn get-statement
-  "Gets the statement of the account given a period of time"
-  [acc-number start-time end-time]
-  {:purchase 100.0
-   :balance (get-balance acc-number)})

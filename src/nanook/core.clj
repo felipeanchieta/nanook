@@ -12,8 +12,3 @@
   (let [final-fact (assoc raw-fact :uuid (generate-uuid))]
     (swap! facts conj final-fact)
     final-fact))
-
-(defn retrieve-fact
-  "TODO: Atomically retrieve a fact from the facts list"
-  [searched-fact]
-  (searched-fact (deref facts)))
