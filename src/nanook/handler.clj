@@ -11,51 +11,57 @@
   (:gen-class))
 
 (defroutes nanook-routes
-  (POST "/accounts/:acc-number{[0-9]{5}}/deposit" request
+  (POST "/accounts/:acc-number{[0-9]{5}}/credit" request
     (response
-     (do-deposit
-      (:acc-number (:params request))
-      (:body request))))
+      (if (contains? (:body request) :timestamp)
+        (credit-op (:acc-number (:params request))
+                   (:amount (:body request))
+                   (:description (:body request))
+                   (:timestamp (:body request)))
 
-  (POST "/accounts/:acc-number{[0-9]{5}}/salary" request
-    (response
-      (pay-salary
-        (:acc-number request)
-        (:body request))))
+        (credit-op (:acc-number (:params request))
+                   (:amount (:body request))
+                   (:description (:body request))))))
 
-  (POST "/accounts/:acc-number{[0-9]{5}}/purchase" request
+  (POST "/accounts/:acc-number{[0-9]{5}}/debit" request
     (response
-      (make-purchase
-        (:acc-number request)
-        (:body request))))
+      (if (contains? (:body request) :timestamp)
+        (debit-op (:acc-number (:params request))
+                  (:amount (:body request))
+                  (:description (:body request))
+                  (:timestamp (:body request)))
 
-  (POST "/accounts/:acc-number{[0-9]{5}}/withdrawal" request
-    (response
-      (do-withdrawal
-        (:acc-number request)
-        (:body request))))
+        (debit-op (:acc-number (:params request))
+                  (:amount (:body request))
+                  (:description (:body request))))))
 
-  (POST "/accounts/create" request
+  ;;; TODO: move to future branch
+  (GET "/accounts/:acc-number{[0-9]{5}}/balance" request
     (response
-      (create-account
-        (:body request))))
+      nil))
 
-  (PUT "/accounts/delete/:account-number{[0-9]{5}}" request
+  (GET "/accounts/:acc-number{[0-9]{5}}/statement" request
     (response
-      (delete-account
-        (:acc-number request)
-        (:body request))))
+      nil))
 
-  (PUT "/accounts/:account-number{[0-9]{5}}/update-credit" request
+  (GET "/accounts/:acc-number{[0-9]{5}}/debit-periods" request
     (response
-      (update-credit
-        0
-        request)))
+      nil))
 
   (route/not-found "Not Found"))
 
+(defn wrap-invalid-requests [handler]
+  (fn [request]
+    (if (coll? (:body request))
+      (let [body (:body request)]
+        (if (and (not (contains? body :amount))
+                 (not (contains? body :description)))
+          {:status 400
+           :body body})))))
+
 (def app
   (-> (handler/api nanook-routes)
+      ;;(wrap-invalid-requests)
       (middleware/wrap-json-body {:keywords? true}) 
       (middleware/wrap-json-response)))
 

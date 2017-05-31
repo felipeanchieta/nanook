@@ -9,8 +9,7 @@
 (defn save-fact!
   "Atomically save a new fact to the facts list"
   [raw-fact]
-  (let [final-fact (assoc raw-fact :timestamp (get-current-timestamp)
-                                   :uuid (generate-uuid))]
+  (let [final-fact (assoc raw-fact :uuid (generate-uuid))]
     (swap! facts conj final-fact)
     final-fact))
 
