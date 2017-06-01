@@ -48,6 +48,10 @@
                      (:description (:body request)))))
         {:body "400 Bad Request" :status 400})))
 
+  (GET "/accounts/:acc-number{[0-9]{5}}/balance" request
+    (response
+     (get-total-balance (:acc-number (:params request)))))
+
   (route/not-found "Not Found"))
 
 (def app
