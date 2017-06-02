@@ -50,7 +50,7 @@
 
   (GET "/accounts/:acc-number{[0-9]{5}}/balance" request
     (response
-     (get-total-balance (:acc-number (:params request)))))
+     (get-balance (:acc-number (:params request)))))
 
   (route/not-found "Not Found"))
 

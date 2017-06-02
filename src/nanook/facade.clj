@@ -31,19 +31,14 @@
   ([acc-number amount description timestamp]
    (operate :debit acc-number amount description timestamp)))
 
-(defn get-total-balance
-  "Gets the total balance of an account from its
-   very first day"
-  [acc-number]
-  (let [balance (:amount (retrieve-fact acc-number))]
-    (if-not (nil? balance)
-      {:balance balance}
-      {:balance 0})))
-
 (defn get-balance
-  ;; TODO: remove and move to #3
-  "Computes the current balance of a given account"
-  [acc-number start-date end-date]
-  (let [start-timestamp (str (f/parse (f/formatters :date) start-date))
-        final-timestamp (str (f/parse (f/formatters :date) end-date))]
-    (retrieve-balance acc-number start-timestamp final-timestamp)))
+  "Gets the total balance of an account from its facts register"
+  [acc-number]
+  (let [facts   (retrieve-facts acc-number)
+        amounts (for [fact facts
+                      :let [amount (:amount fact)]]
+                  (case (:operation fact)
+                    :credit amount
+                    :debit  (- amount)
+                    0.0))]
+    {:balance (apply + amounts)}))

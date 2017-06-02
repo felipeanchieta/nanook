@@ -11,22 +11,12 @@
   [raw-fact]
   (let [final-fact (assoc raw-fact :uuid (generate-uuid))]
     (do
-      (swap! nanook-facts merge {:account (:account final-fact) :fact final-fact})
-      ;; TODO: change data model
+      (swap!
+       nanook-facts
+       update-in [(keyword (:account final-fact)) :facts] #(into [] (conj % final-fact)))
       final-fact)))
 
-(defn retrieve-fact
+(defn retrieve-facts
   "Atomically retrieve a fact from the nanook-facts map"
   [acc-number]
-  ;; TODO: retrieve a fact by account
-  (:fact @nanook-facts))
-
-(defn retrieve-balance
-  ;; TODO: remove and move to #3
-  "Retrieve the balance between two dates, given an account"
-  [acc-number start-timestamp end-timestamp]
-  (assoc (retrieve-fact acc-number)
-         :balance 0.0
-         :start start-timestamp
-         :end end-timestamp))
-
+  (:facts ((keyword acc-number) @nanook-facts)))
