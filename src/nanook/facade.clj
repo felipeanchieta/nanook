@@ -42,3 +42,12 @@
                     :debit  (- amount)
                     0.0))]
     {:balance (apply + amounts)}))
+
+(defn get-statement
+  "Gets the bank statement of a given account within a given period of time"
+  [acc-number initial-date final-date]
+  0)
+;  (let [facts (retrieve-facts acc-number)]
+;    (for [fact facts
+;          :when CONDICAO]
+;      {:balance 0.0})))

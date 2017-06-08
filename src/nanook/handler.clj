@@ -48,6 +48,15 @@
     (response
      (get-balance (:acc-number (:params request)))))
 
+  (POST "/accounts/:acc-number{[0-9]{5}}/statement" request
+    (let [validated (clova/validate statement-validation (:body request))]
+      (if (:valid? validated)
+        (response
+         (get-statement (:acc-number (:params request))
+                        (:from (:body request))
+                        (:to (:body request))))
+        {:body "400 Bad Request" :status 400})))
+
   (route/not-found "Not Found"))
 
 (def app
