@@ -2,7 +2,8 @@
   "This namespace contains the validation definitions
    that are used in the handler in order to filter out
    request with wrong bodies"
-  (:require [clova.core :as clova]))
+  (:require [clj-time.format :as f]
+            [clova.core :as clova]))
 
 (def credit-validation
   (clova/validation-set [:amount clova/required? clova/numeric? clova/positive?
@@ -11,8 +12,8 @@
 (def debit-validation credit-validation)
 
 (def statement-validation
-  (clova/validation-set [:from clova/required? clova/date?
-                         :to clova/required? clova/date?]))
+  (clova/validation-set [:from clova/required? [clova/date? {:formatter "dd/MM/yyyy"}]
+                         :to clova/required? [clova/date? {:formatter "dd/MM/yyyy"}]]))
 
 (def debit-periods-validation
   (clova/validation-set [:from clova/required? clova/date?

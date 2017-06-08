@@ -16,6 +16,7 @@
 (defroutes nanook-routes
   (POST "/accounts/:acc-number{[0-9]{5}}/credit" request
     (let [validated (clova/validate credit-validation (:body request))]
+      ;(println request)
       (if (:valid? validated)
         (response
          (if (contains? (:body request) :timestamp)
@@ -30,7 +31,7 @@
         {:body "400 Bad Request" :status 400})))
 
   (POST "/accounts/:acc-number{[0-9]{5}}/debit" request
-    (let [validated (clova/validate credit-validation (:body request))]
+    (let [validated (clova/validate debit-validation (:body request))]
       (if (:valid? validated)
         (response
          (if (contains? (:body request) :timestamp)

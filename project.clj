@@ -1,4 +1,4 @@
-(defproject nanook "0.1.0-SNAPSHOT"
+(defproject nanook "0.3.0-SNAPSHOT"
   :description "Account manager for banks written in Clojure"
   :url "http://github.com/felipeanchieta/nanook"
   :license {:name "Eclipse Public License"
