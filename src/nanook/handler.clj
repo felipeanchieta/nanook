@@ -1,21 +1,17 @@
 (ns nanook.handler
   "This namespace is responsible for handling the HTTP requests of
    Nanook, defining further actions regarding their URIs"
-  (:use [compojure.core]
-        [nanook.facade])
-  (:require [compojure.handler :as handler]
+  (:require [compojure.core :refer :all]
+            [compojure.handler :as handler]
             [compojure.route :as route]
             [clova.core :as clova]
+            [nanook.facade :refer :all]
+            [nanook.validation :refer :all]
+            [ring.middleware.defaults :refer :all]
             [ring.middleware.json :as middleware]
             [ring.util.response :refer [resource-response response status]]
             [ring.adapter.jetty :refer (run-jetty)])
   (:gen-class))
-
-(def credit-validation
-  (clova/validation-set [:amount clova/required? clova/numeric? clova/positive?
-                         :description clova/required? clova/stringy? [clova/longer? 5] [clova/shorter? 255]]))
-
-(def debit-validation credit-validation)
 
 (defroutes nanook-routes
   (POST "/accounts/:acc-number{[0-9]{5}}/credit" request
@@ -55,7 +51,7 @@
   (route/not-found "Not Found"))
 
 (def app
-  (-> (handler/api nanook-routes)
+  (-> (wrap-defaults nanook-routes api-defaults)
       (middleware/wrap-json-body {:keywords? true})
       (middleware/wrap-json-response)))
 

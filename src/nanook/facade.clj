@@ -2,9 +2,9 @@
   "The responsibility of this façade namespace is to create a layer of abstraction
    between clients, like a handler of REST methods, and a layer of core businesses
    that must be protected."
-  (:require [clj-time.format :as f])
-  (:use [nanook.core]
-        [nanook.utils]))
+  (:require [clj-time.format :as f]
+            [nanook.core :refer :all]
+            [nanook.utils :refer :all]))
 
 (defn- operate
   "Do a banking operation like :credit or :debit"

@@ -2,7 +2,7 @@
   "This namespace contains the core businesses of Nanook
    which basically consists of a facts atom list that
    will store the checking accounts facts"
-  (:use [nanook.utils]))
+  (:require [nanook.utils :refer :all]))
 
 (def nanook-facts (atom {}))
 
