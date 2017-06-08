@@ -62,3 +62,8 @@
                             :description (:description fact)
                             :amount (:amount fact)}))}))
 
+(defn get-debt-periods
+  "Gets the periods of debt from a given account, so that Nanook can charge
+   interest on that"
+  [acc-number] ; probably need to sort the facts, huh?
+  {:periods (into [] (for [fact facts] fact))})
