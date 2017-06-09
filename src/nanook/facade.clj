@@ -5,6 +5,7 @@
   (:require [clj-time.core :as t]
             [clj-time.format :as f]
             [clj-time.local :as l]
+            [clj-time.predicates :as pr]
             [nanook.core :refer :all]
             [nanook.utils :refer :all]))
 
@@ -101,6 +102,19 @@
 
 (defn get-debt-periods
   "Gets the periods of debt from a given account, so that Nanook can charge
-   interest on that"
+   interest on that. It uses a private function as a matter of organisation
+   We translate timestamps to human readable formats here also"
   [acc-number]
-  (get-debt-periods-loop (retrieve-facts acc-number)))
+  {:periods
+   (let [periods (:periods (get-debt-periods-loop (retrieve-facts acc-number)))]
+     (into [] (for [period periods
+                    :let [amount (:amount period)
+                          start  (->> (:start period)
+                                      (l/to-local-date-time)
+                                      (f/unparse human-friendly-format))
+                          end    (->> (:end period)
+                                      (l/to-local-date-time)
+                                      (f/unparse human-friendly-format))]]
+                {:amount amount
+                 :start start
+                 :end end})))})

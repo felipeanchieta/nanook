@@ -46,7 +46,6 @@
                            :get
                            "/accounts/59373/debt-periods"))
             body     (parse-body (:body response))]
-        (println body)
         (is (= (:status response) 200))
         (is (= (:periods body) [{:amount -1000.0
                                  :start "09/02/2017"
