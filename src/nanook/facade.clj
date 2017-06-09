@@ -62,8 +62,45 @@
                             :description (:description fact)
                             :amount (:amount fact)}))}))
 
+(defn- get-debt-periods-loop
+  "Private loop for get-debt-periods"
+  [facts]
+  {:periods
+   (into [] (loop [[fact & other-facts] facts
+                   balance 0.0
+                   in-debt? false
+                   debt-periods '()
+                   tmp-timestamp nil]
+              (if (nil? fact)
+                (if-not (nil? tmp-timestamp)
+                  (conj debt-periods {:amount balance
+                                      :start tmp-timestamp
+                                      :end (get-current-timestamp)})
+                  debt-periods)
+                (let [new-balance (case (:operation fact)
+                                    :credit (+ balance (:amount fact))
+                                    :debit (- balance (:amount fact))
+                                    balance)
+                      new-in-debt? (< new-balance 0.0)
+                      new-debt-periods (if (and (not new-in-debt?)
+                                                (not (nil? tmp-timestamp)))
+                                         (conj debt-periods {:amount balance
+                                                             :start tmp-timestamp
+                                                             :end (:timestamp fact)})
+                                         debt-periods)
+                      new-tmp-timestamp (if (and new-in-debt?
+                                                 (nil? tmp-timestamp))
+                                          (:timestamp fact)
+                                          nil)]
+                  (recur
+                   other-facts
+                   new-balance
+                   new-in-debt?
+                   new-debt-periods
+                   new-tmp-timestamp)))))})
+
 (defn get-debt-periods
   "Gets the periods of debt from a given account, so that Nanook can charge
    interest on that"
-  [acc-number] ; probably need to sort the facts, huh?
-  {:periods (into [] (for [fact facts] fact))})
+  [acc-number]
+  (get-debt-periods-loop (retrieve-facts acc-number)))

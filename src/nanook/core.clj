@@ -19,4 +19,7 @@
 (defn retrieve-facts
   "Atomically retrieve a fact from the nanook-facts map"
   [acc-number]
-  (:facts ((keyword acc-number) @nanook-facts)))
+  (let [facts (:facts ((keyword acc-number) @nanook-facts))]
+    (if (nil? facts)
+      '()
+      facts)))

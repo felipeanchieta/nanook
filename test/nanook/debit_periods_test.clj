@@ -47,4 +47,6 @@
                            "/accounts/59373/debit-periods"))
             body     (parse-body (:body response))]
         (is (= (:status response) 200))
-        (is (= (:periods body) [{:amount 1000.0 :start "09/02/2017" :end "15/02/2017"}]))))))
+        (is (= (:periods body) [{:amount -1000.0
+                                 :start "09/02/2017"
+                                 :end "15/02/2017"}]))))))
