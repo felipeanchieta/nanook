@@ -60,7 +60,7 @@
 
   (GET "/accounts/:acc-number{[0-9]{5}}/debt-periods" request
     (response
-     (get-debt-periods (:acc-number (:param request)))))
+     (get-debt-periods (:acc-number (:params request)))))
 
   (route/not-found "Not Found"))
 

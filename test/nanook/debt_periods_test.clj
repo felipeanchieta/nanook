@@ -1,4 +1,4 @@
-(ns nanook.debit-periods-test
+(ns nanook.debt-periods-test
   "This is the namespace that tests HTTP endpoints for debit periods request"
   (:require [cheshire.core :as json]
             [clojure.test :refer :all]
@@ -34,9 +34,9 @@
                               (mock/content-type "application/json")))]
     (is (= (:status response) 200))))
 
-(deftest debit-periods-test
+(deftest debt-periods-test
   (testing
-   "Just one period of debit"
+   "Just one period of debt"
     (do
       (put-credit 3000.0 "59373" "2017-01-08T11:51:18+00:00" app)
       (put-credit 3000.0 "59373" "2017-02-08T11:51:18+00:00" app)
@@ -44,8 +44,9 @@
       (put-credit 2000.0 "59373" "2017-02-15T11:51:18+00:00" app)
       (let [response (app (mock/request
                            :get
-                           "/accounts/59373/debit-periods"))
+                           "/accounts/59373/debt-periods"))
             body     (parse-body (:body response))]
+        (println body)
         (is (= (:status response) 200))
         (is (= (:periods body) [{:amount -1000.0
                                  :start "09/02/2017"
