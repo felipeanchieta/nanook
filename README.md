@@ -149,7 +149,8 @@ It's bizarre not to think that all forms are being covered in nanook.facade thou
 
 ## Lints statuses
 
-development@osp06083d:~/Documents/kendrick/nanook$ lein eastwood
+```
+felipe@host:~/Documents/nanook$ lein eastwood
 == Eastwood 0.2.4 Clojure 1.8.0 JVM 1.8.0_131
 Directories scanned for source files:
   src test
@@ -164,8 +165,9 @@ Directories scanned for source files:
 == Linting nanook.balance-test ==
 == Linting nanook.debt-periods-test ==
 == Warnings: 0 (not including reflection warnings)  Exceptions thrown: 0
-development@osp06083d:~/Documents/kendrick/nanook$ lein cljfmt check
+felipe@host:~/Documents/nanook$ lein cljfmt check
 All source files formatted correctly
+```
 
 ## License
 
