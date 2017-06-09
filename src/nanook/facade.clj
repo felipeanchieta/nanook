@@ -44,8 +44,7 @@
                       :let [amount (:amount fact)]]
                   (case (:operation fact)
                     :credit amount
-                    :debit  (- amount)
-                    0.0))]
+                    :debit  (- amount)))]
     {:balance (apply + amounts)}))
 
 (defn get-statement
@@ -80,8 +79,7 @@
                   debt-periods)
                 (let [new-balance (case (:operation fact)
                                     :credit (+ balance (:amount fact))
-                                    :debit (- balance (:amount fact))
-                                    balance)
+                                    :debit (- balance (:amount fact)))
                       new-in-debt? (< new-balance 0.0)
                       new-debt-periods (if (and (not new-in-debt?)
                                                 (not (nil? tmp-timestamp)))
@@ -92,7 +90,9 @@
                       new-tmp-timestamp (if (and new-in-debt?
                                                  (nil? tmp-timestamp))
                                           (:timestamp fact)
-                                          nil)]
+                                          (if new-in-debt?
+                                            tmp-timestamp
+                                            nil))]
                   (recur
                    other-facts
                    new-balance
