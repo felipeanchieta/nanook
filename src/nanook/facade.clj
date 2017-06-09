@@ -5,6 +5,7 @@
   (:require [clj-time.core :as t]
             [clj-time.format :as f]
             [clj-time.local :as l]
+            [clj-time.predicates :as pr]
             [nanook.core :refer :all]
             [nanook.utils :refer :all]))
 
@@ -43,8 +44,7 @@
                       :let [amount (:amount fact)]]
                   (case (:operation fact)
                     :credit amount
-                    :debit  (- amount)
-                    0.0))]
+                    :debit  (- amount)))]
     {:balance (apply + amounts)}))
 
 (defn get-statement
@@ -62,3 +62,59 @@
                             :description (:description fact)
                             :amount (:amount fact)}))}))
 
+(defn- get-debt-periods-loop
+  "Private loop for get-debt-periods"
+  [facts]
+  {:periods
+   (into [] (loop [[fact & other-facts] facts
+                   balance 0.0
+                   in-debt? false
+                   debt-periods '()
+                   tmp-timestamp nil]
+              (if (nil? fact)
+                (if-not (nil? tmp-timestamp)
+                  (conj debt-periods {:amount balance
+                                      :start tmp-timestamp
+                                      :end (get-current-timestamp)})
+                  debt-periods)
+                (let [new-balance (case (:operation fact)
+                                    :credit (+ balance (:amount fact))
+                                    :debit (- balance (:amount fact)))
+                      new-in-debt? (< new-balance 0.0)
+                      new-debt-periods (if (and (not new-in-debt?)
+                                                (not (nil? tmp-timestamp)))
+                                         (conj debt-periods {:amount balance
+                                                             :start tmp-timestamp
+                                                             :end (:timestamp fact)})
+                                         debt-periods)
+                      new-tmp-timestamp (if (and new-in-debt?
+                                                 (nil? tmp-timestamp))
+                                          (:timestamp fact)
+                                          (if new-in-debt?
+                                            tmp-timestamp
+                                            nil))]
+                  (recur
+                   other-facts
+                   new-balance
+                   new-in-debt?
+                   new-debt-periods
+                   new-tmp-timestamp)))))})
+
+(defn get-debt-periods
+  "Gets the periods of debt from a given account, so that Nanook can charge
+   interest on that. It uses a private function as a matter of organisation
+   We translate timestamps to human readable formats here also"
+  [acc-number]
+  {:periods
+   (let [periods (:periods (get-debt-periods-loop (retrieve-facts acc-number)))]
+     (into [] (for [period periods
+                    :let [amount (:amount period)
+                          start  (->> (:start period)
+                                      (l/to-local-date-time)
+                                      (f/unparse human-friendly-format))
+                          end    (->> (:end period)
+                                      (l/to-local-date-time)
+                                      (f/unparse human-friendly-format))]]
+                {:amount amount
+                 :start start
+                 :end end})))})
