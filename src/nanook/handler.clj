@@ -16,7 +16,6 @@
 (defroutes nanook-routes
   (POST "/accounts/:acc-number{[0-9]{5}}/credit" request
     (let [validated (clova/validate credit-validation (:body request))]
-      ;(println request)
       (if (:valid? validated)
         (response
          (if (contains? (:body request) :timestamp)
@@ -64,10 +63,16 @@
 
   (route/not-found "Not Found"))
 
+(defn wrap-content-json [h]
+  "Bug solved as per https://stackoverflow.com/a/34711268/6695586
+   Basically ring somehow forgot it should respond a JSON, not a plain text"
+  (fn [req] (assoc-in (h req) [:headers "Content-Type"] "application/json")))
+
 (def app
   (-> (wrap-defaults nanook-routes api-defaults)
       (middleware/wrap-json-body {:keywords? true})
-      (middleware/wrap-json-response)))
+      (middleware/wrap-json-response)
+      (wrap-content-json)))
 
 (defn -main [& args]
   (run-jetty app {:port 3000
