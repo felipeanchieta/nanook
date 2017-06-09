@@ -64,10 +64,14 @@
 
   (route/not-found "Not Found"))
 
+(defn wrap-content-json [h]
+  (fn [req] (assoc-in (h req) [:headers "Content-Type"] "application/json")))
+
 (def app
   (-> (wrap-defaults nanook-routes api-defaults)
       (middleware/wrap-json-body {:keywords? true})
-      (middleware/wrap-json-response)))
+      (middleware/wrap-json-response)
+      (wrap-content-json)))
 
 (defn -main [& args]
   (run-jetty app {:port 3000
